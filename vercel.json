@@ -5,7 +5,7 @@
   "framework": "nextjs",
   "regions": ["sin1"],
   "env": {
-    "DATABASE_URL": "@database_url",
-    "NEXTAUTH_SECRET": "@nextauth_secret"
+    "DATABASE_URL": "postgresql://neondb_owner:npg_d1ANaIc2qsmS@ep-muddy-dust-a45flphr-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+    "NEXTAUTH_SECRET": "E6d9oakmWpX4MJUr8b0qlLb/SxsZuR26is6F00FVmW4="
   }
 }
