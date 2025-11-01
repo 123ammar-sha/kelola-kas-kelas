@@ -12,6 +12,7 @@ import {
   Settings,
   LogOut,
   CreditCard,
+  KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +32,8 @@ const menuItems = {
   ],
   ADMINISTRATOR: [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/users", label: "Kelola User", icon: Users },
+    { href: "/dashboard/users", label: "Kelola User", icon: KeyRound },
+    { href: "/dashboard/anggota", label: "Anggota", icon: Users },
     { href: "/dashboard/settings", label: "Pengaturan", icon: Settings },
   ],
 };
