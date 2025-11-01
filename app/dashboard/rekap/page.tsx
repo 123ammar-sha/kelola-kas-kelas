@@ -134,9 +134,9 @@ export default async function RekapPage() {
       {data.groupedTransactions.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Rekap Tagihan</CardTitle>
+            <CardTitle>Transaksi Masuk</CardTitle>
             <CardDescription>
-              Detail pembayaran tagihan per batch
+              Detail transaksi  masuk dan tagihan per batch
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -182,8 +182,8 @@ export default async function RekapPage() {
       )}
 
       {/* Other Transactions */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+      <div className="">
+        {/* <Card>
           <CardHeader>
             <CardTitle>Transaksi Masuk Lainnya</CardTitle>
             <CardDescription>Pemasukan selain dari tagihan</CardDescription>
@@ -225,7 +225,7 @@ export default async function RekapPage() {
               )}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card>
           <CardHeader>

@@ -1,3 +1,4 @@
+// ...existing code...
 "use client";
 
 import { useState, useEffect } from "react";
@@ -47,6 +48,9 @@ export function TagihanPageClient({ role }: { role: string }) {
     autoCreate: false,
     weeksCount: "4",
   });
+
+  // <-- tambahan state untuk search -->
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchBills();
@@ -137,9 +141,15 @@ export function TagihanPageClient({ role }: { role: string }) {
     }
   };
 
-  // Group bills by batchId for bendahara
+  // filter bills berdasarkan searchQuery (nama anggota)
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredBills = normalizedQuery
+    ? bills.filter((b) => (b.user?.name || "").toLowerCase().includes(normalizedQuery))
+    : bills;
+
+  // Group bills by batchId for bendahara (gunakan filteredBills)
   const groupedBills: BillGroup[] = role === "BENDAHARA" 
-    ? bills.reduce((acc, bill) => {
+    ? filteredBills.reduce((acc, bill) => {
         const batchId = bill.batchId || bill.id;
         const existing = acc.find(g => g.batchId === batchId);
         
@@ -165,9 +175,9 @@ export function TagihanPageClient({ role }: { role: string }) {
       }, [] as BillGroup[])
     : [];
 
-  const pendingBills = bills.filter((b) => b.status === "PENDING");
-  const claimedBills = bills.filter((b) => b.status === "CLAIMED_PAID");
-  const paidBills = bills.filter((b) => b.status === "PAID");
+  const pendingBills = filteredBills.filter((b) => b.status === "PENDING");
+  const claimedBills = filteredBills.filter((b) => b.status === "CLAIMED_PAID");
+  const paidBills = filteredBills.filter((b) => b.status === "PAID");
 
   return (
     <div className="space-y-6">
@@ -187,14 +197,15 @@ export function TagihanPageClient({ role }: { role: string }) {
           </Button>
         )}
       </div>
+      
 
       {showForm && role === "BENDAHARA" && (
         <Card>
-          <CardHeader>
+          <CardHeader>            
             <CardTitle>Buat Tagihan Baru</CardTitle>
             <CardDescription>
               Tagihan akan dibuat untuk SEMUA anggota kelas secara otomatis
-            </CardDescription>
+            </CardDescription>            
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -288,7 +299,7 @@ export function TagihanPageClient({ role }: { role: string }) {
                   Batal
                 </Button>
               </div>
-            </form>
+            </form>            
           </CardContent>
         </Card>
       )}
@@ -302,7 +313,7 @@ export function TagihanPageClient({ role }: { role: string }) {
                 Tagihan Pending
               </CardTitle>
               <CardDescription>{pendingBills.length} tagihan</CardDescription>
-            </CardHeader>
+            </CardHeader>            
             <CardContent>
               <p className="text-3xl font-bold text-orange-600">
                 {formatCurrency(
@@ -349,10 +360,24 @@ export function TagihanPageClient({ role }: { role: string }) {
       {role === "BENDAHARA" ? (
         <Card>
           <CardHeader>
-            <CardTitle>Verifikasi Pembayaran</CardTitle>
+            <CardTitle>Verifikasi Pembayaran</CardTitle>            
             <CardDescription>
               Verifikasi pembayaran yang sudah diklaim anggota
             </CardDescription>
+            {/* Search bar: cari berdasarkan nama anggota */}
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder="Cari nama anggota..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-md"
+        />
+        {searchQuery && (
+          <Button variant="ghost" onClick={() => setSearchQuery("")}>
+            Clear
+          </Button>
+        )}
+      </div>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -464,13 +489,13 @@ export function TagihanPageClient({ role }: { role: string }) {
           <CardContent>
             {loading ? (
               <div className="text-center py-8">Memuat...</div>
-            ) : bills.length === 0 ? (
+            ) : filteredBills.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 Belum ada tagihan
               </div>
             ) : (
               <div className="space-y-4">
-                {bills.map((bill) => (
+                {filteredBills.map((bill) => (
                   <div
                     key={bill.id}
                     className={`flex items-center justify-between p-4 border rounded-lg ${
@@ -538,3 +563,4 @@ export function TagihanPageClient({ role }: { role: string }) {
     </div>
   );
 }
+// ...existing code...

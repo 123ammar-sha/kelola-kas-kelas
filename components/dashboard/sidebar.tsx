@@ -19,6 +19,7 @@ const menuItems = {
   ANGGOTA: [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/dashboard/tagihan", label: "Tagihan Saya", icon: CreditCard },
+    { href: "/dashboard/settings", label: "Pengaturan", icon: Settings },
   ],
   BENDAHARA: [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -26,6 +27,7 @@ const menuItems = {
     { href: "/dashboard/rekap", label: "Rekap", icon: TrendingUp },
     { href: "/dashboard/tagihan", label: "Tagihan", icon: FileText },
     { href: "/dashboard/anggota", label: "Anggota", icon: Users },
+    { href: "/dashboard/settings", label: "Pengaturan", icon: Settings },
   ],
   ADMINISTRATOR: [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },

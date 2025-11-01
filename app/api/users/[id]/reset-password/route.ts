@@ -16,7 +16,7 @@ export async function POST(
     }
 
     // Generate random password
-    const newPassword = Math.random().toString(36).slice(-12);
+    const newPassword = "inforumuka24";
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await prisma.user.update({

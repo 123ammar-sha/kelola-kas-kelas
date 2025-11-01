@@ -52,6 +52,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
+    
   } catch (error) {
     console.error("Error deleting transaction:", error);
     return NextResponse.json(
