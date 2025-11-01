@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMINISTRATOR
+  BENDAHARA
+  ANGGOTA
+}
+
+enum TransactionType {
+  MASUK
+  KELUAR
+}
+
+enum BillStatus {
+  PENDING
+  CLAIMED_PAID  // Anggota mengklaim sudah bayar, menunggu verifikasi
+  PAID          // Sudah diverifikasi bendahara
+  OVERDUE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(ANGGOTA)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  bills        Bill[]        @relation("UserBills")
+  transactions Transaction[] @relation("UserTransactions")
+  
+  @@map("users")
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  amount      Float
+  type        TransactionType
+  description String
+  userId      String
+  createdAt   DateTime        @default(now())
+  
+  // Relations
+  user User @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+model Bill {
+  id          String     @id @default(cuid())
+  amount      Float
+  description String
+  dueDate     DateTime
+  status      BillStatus @default(PENDING)
+  userId      String
+  batchId     String?    // For grouping bills created together
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  // Relations
+  user User @relation("UserBills", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([batchId])
+  @@map("bills")
+}

@@ -1,0 +1,34 @@
+╔══════════════════════════════════════════════════════════════╗
+║            QUICK START - SETUP NEON DB                       ║
+╚══════════════════════════════════════════════════════════════╝
+
+LANGKAH SINGKAT (Copy & Paste):
+
+1. DAPATKAN CONNECTION STRING dari Neon
+   - Login ke neon.tech
+   - Pilih project
+   - Copy "Connection string"
+
+2. SETUP .ENV
+   cp .env.example .env
+   # Buka .env, paste connection string ke DATABASE_URL
+   # Generate secret: openssl rand -base64 32
+
+3. INSTALL & SETUP
+   npm install
+   npm run db:generate
+   npm run db:push
+   npm run db:seed
+
+4. JALANKAN
+   npm run dev
+   
+5. LOGIN di http://localhost:3000
+   - Admin: admin@kelas.local / admin123
+   - Bendahara: bendahara@kelas.local / bendahara123
+   - Anggota: anggota1@kelas.local / anggota123
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DETAIL LENGKAP: Baca NEXT_STEPS.md atau SETUP.md
+
