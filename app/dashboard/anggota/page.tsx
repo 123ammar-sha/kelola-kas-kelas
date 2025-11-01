@@ -6,8 +6,8 @@ import { AnggotaPageClient } from "@/components/anggota/anggota-page-client";
 export default async function AnggotaPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "BENDAHARA") {
-    redirect("/dashboard");
+  if (!session || session.user.role !== "BENDAHARA" || "ADMINISTRATOR") {
+    redirect("/login");
   }
 
   return <AnggotaPageClient />;
