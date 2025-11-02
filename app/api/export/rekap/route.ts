@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import XLSX from "xlsx";
+import * as XLSX from "xlsx";
 
 export async function GET() {
   try {
@@ -20,7 +20,7 @@ export async function GET() {
       },
     });
 
-    // Group transactions by type and description
+    // Group transactions by type
     const masuk = transactions.filter((t) => t.type === "MASUK");
     const keluar = transactions.filter((t) => t.type === "KELUAR");
     
@@ -34,107 +34,98 @@ export async function GET() {
       return acc;
     }, {} as Record<string, typeof masuk>);
 
-    // Prepare worksheets
+    // Prepare worksheets data
     const worksheets: { name: string; data: any[][] }[] = [];
 
     // Sheet 1: Rekap Kas (grouped)
-    const kasRows: any[][] = [
+    const kasRows = [
       ["REKAP KAS"],
-      [""],
-      ["Tanggal", "Keterangan", "Anggota", "Jumlah"],
-    ];
-    
-    Object.entries(groupedMasuk).forEach(([desc, trans]) => {
-      trans.forEach((t) => {
-        kasRows.push([
-          new Date(t.createdAt).toLocaleDateString("id-ID"),
-          t.description.split(" - ")[0],
-          t.description.split(" - ")[1] || "-",
-          t.amount,
-        ]);
-      });
-    });
-
-    kasRows.push(["", "", "TOTAL KAS:", Object.values(groupedMasuk).flat().reduce((sum, t) => sum + t.amount, 0)]);
-    worksheets.push({ name: "Rekap Kas", data: kasRows });
-
-    // Sheet 2: Pemasukan Lainnya
-    const kasDescriptions = Object.keys(groupedMasuk);
-    const pemasukanLain = masuk.filter(
-      (t) => !kasDescriptions.includes(t.description.split(" - ")[0])
-    );
-    const pemasukanRows: any[][] = [
-      ["PEMASUKAN LAINNYA"],
       [""],
       ["Tanggal", "Keterangan", "Jumlah"],
     ];
     
-    pemasukanLain.forEach((t) => {
-      pemasukanRows.push([
-        new Date(t.createdAt).toLocaleDateString("id-ID"),
-        t.description,
-        t.amount,
-      ]);
+    Object.entries(groupedMasuk).forEach(([desc, trans]) => {
+      trans.forEach((t) => {
+        // Gabungkan nama anggota dengan keterangan
+        const keterangan = `${t.description} - ${t.user.name}`;
+        
+        kasRows.push([
+          new Date(t.createdAt).toLocaleDateString("id-ID"),
+          keterangan,
+          t.amount.toString(), // Convert to string
+        ]);
+      });
     });
 
-    pemasukanRows.push(["", "TOTAL:", pemasukanLain.reduce((sum, t) => sum + t.amount, 0)]);
-    worksheets.push({ name: "Pemasukan Lain", data: pemasukanRows });
+    // Calculate total and convert to string
+    const totalKas = Object.values(groupedMasuk).flat().reduce((sum, t) => sum + t.amount, 0);
+    kasRows.push([
+      "", 
+      "TOTAL KAS:", 
+      totalKas.toString() // Convert to string
+    ]);
+    
+    // Create workbook and add worksheets
+    const wb = XLSX.utils.book_new();
+    
+    // Add Rekap Kas sheet
+    const ws = XLSX.utils.aoa_to_sheet(kasRows);
+    XLSX.utils.book_append_sheet(wb, ws, "Rekap Kas");
 
-    // Sheet 3: Pengeluaran
-    const pengeluaranRows: any[][] = [
+    // Sheet 2: Pengeluaran
+    const pengeluaranRows = [
       ["PENGELUARAN"],
       [""],
       ["Tanggal", "Keterangan", "Jumlah"],
     ];
     
     keluar.forEach((t) => {
+      // Untuk pengeluaran, tambahkan nama user jika ada
+      const keterangan = t.user ? `${t.description} - ${t.user.name}` : t.description;
+      
       pengeluaranRows.push([
         new Date(t.createdAt).toLocaleDateString("id-ID"),
-        t.description,
-        t.amount,
+        keterangan,
+        t.amount.toString(), // Convert to string
       ]);
     });
 
-    pengeluaranRows.push(["", "TOTAL:", keluar.reduce((sum, t) => sum + t.amount, 0)]);
-    worksheets.push({ name: "Pengeluaran", data: pengeluaranRows });
+    // Calculate total pengeluaran and convert to string
+    const totalPengeluaran = keluar.reduce((sum, t) => sum + t.amount, 0);
+    pengeluaranRows.push(["", "TOTAL:", totalPengeluaran.toString()]); // Convert to string
+    
+    const wsPengeluaran = XLSX.utils.aoa_to_sheet(pengeluaranRows);
+    XLSX.utils.book_append_sheet(wb, wsPengeluaran, "Pengeluaran");
 
-    // Sheet 4: Summary
+    // Sheet 3: Summary - tetap sebagai number untuk perhitungan Excel
     const totalMasuk = masuk.reduce((sum, t) => sum + t.amount, 0);
     const totalKeluar = keluar.reduce((sum, t) => sum + t.amount, 0);
     const saldo = totalMasuk - totalKeluar;
     
-    const summaryRows: any[][] = [
+    const summaryRows = [
       ["RINGKASAN KEUANGAN"],
       [""],
-      ["Total Pemasukan", totalMasuk],
-      ["Total Pengeluaran", totalKeluar],
-      ["Saldo Akhir", saldo],
+      ["Total Pemasukan", totalMasuk], // Tetap number agar Excel bisa kalkulasi
+      ["Total Pengeluaran", totalKeluar], // Tetap number agar Excel bisa kalkulasi
+      ["Saldo Akhir", saldo], // Tetap number agar Excel bisa kalkulasi
     ];
-    worksheets.push({ name: "Ringkasan", data: summaryRows });
-
-    // Create workbook
-    const workbook = XLSX.utils.book_new();
-    worksheets.forEach((sheet) => {
-      const worksheet = XLSX.utils.aoa_to_sheet(sheet.data);
-      XLSX.utils.book_append_sheet(workbook, worksheet, sheet.name);
-    });
+    
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+    XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan");
 
     // Generate buffer
-    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
 
-    // Return file
-    return new NextResponse(buffer, {
+    // Return file with correct headers
+    return new Response(buf, {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="rekap-kas-${new Date().toISOString().split("T")[0]}.xlsx"`,
       },
     });
+
   } catch (error) {
     console.error("Error exporting:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-

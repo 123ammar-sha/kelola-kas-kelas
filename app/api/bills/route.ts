@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { amount, description, dueDate, weeksCount } = body;
+    const { amount, description, dueDate, weeksCount, userIds, forAllUsers } = body;
 
     if (!amount || !description || !dueDate) {
       return NextResponse.json(
@@ -55,12 +55,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get all members (ANGGOTA role)
-    const members = await prisma.user.findMany({
-      where: { role: "ANGGOTA" },
-    });
+    // Dapatkan users berdasarkan pilihan
+    let targetUsers;
+    if (forAllUsers) {
+      // Untuk semua anggota
+      targetUsers = await prisma.user.findMany({
+        where: { role: "ANGGOTA" },
+      });
+    } else {
+      // Untuk user tertentu
+      if (!userIds || userIds.length === 0) {
+        return NextResponse.json(
+          { error: "User IDs are required when not for all users" },
+          { status: 400 }
+        );
+      }
+      targetUsers = await prisma.user.findMany({
+        where: { 
+          id: { in: userIds },
+          role: "ANGGOTA" 
+        },
+      });
+    }
 
-    if (members.length === 0) {
+    if (targetUsers.length === 0) {
       return NextResponse.json(
         { error: "No members found" },
         { status: 404 }
@@ -81,11 +99,11 @@ export async function POST(request: NextRequest) {
         ? `${description} - Minggu ${week + 1}`
         : description;
 
-      const billData = members.map((member) => ({
+      const billData = targetUsers.map((user) => ({
         amount: parseFloat(amount),
         description: weekDescription,
         dueDate: currentDueDate,
-        userId: member.id,
+        userId: user.id,
         batchId,
       }));
 

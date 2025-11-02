@@ -7,7 +7,7 @@ import { TransactionPageClient } from "@/components/transaksi/transaction-page-c
 export default async function TransaksiPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "BENDAHARA") {
+  if (!session || session.user.role == "ANGGOTA") {
     redirect("/dashboard");
   }
 

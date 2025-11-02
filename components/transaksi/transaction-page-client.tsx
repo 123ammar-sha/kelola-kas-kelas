@@ -12,7 +12,9 @@ import {
   TrendingDown, 
   Plus,
   Trash2,
-  Edit
+  Edit,
+  Search,
+  X
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useSession } from "next-auth/react";
@@ -37,6 +39,7 @@ export function TransactionPageClient() {
     description: "",
   });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState(""); // State untuk search
 
   useEffect(() => {
     fetchTransactions();
@@ -117,6 +120,17 @@ export function TransactionPageClient() {
     });
     setShowForm(true);
   };
+
+  // Filter transactions berdasarkan search query
+  const filteredTransactions = transactions.filter(transaction => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      transaction.description.toLowerCase().includes(searchLower) ||
+      formatDate(new Date(transaction.createdAt)).toLowerCase().includes(searchLower) ||
+      transaction.type.toLowerCase().includes(searchLower) ||
+      formatCurrency(transaction.amount).toLowerCase().includes(searchLower)
+    );
+  });
 
   const totalMasuk = transactions
     .filter((t) => t.type === "MASUK")
@@ -272,17 +286,37 @@ export function TransactionPageClient() {
           <CardDescription>
             Semua transaksi yang telah dicatat
           </CardDescription>
+          {/* Search Bar */}
+          <div className="flex items-center gap-2 mt-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Cari berdasarkan keterangan, tanggal, atau jumlah..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-9"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-8">Memuat...</div>
-          ) : transactions.length === 0 ? (
+          ) : filteredTransactions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              Belum ada transaksi
+              {searchQuery ? "Tidak ada transaksi yang cocok dengan pencarian" : "Belum ada transaksi"}
             </div>
           ) : (
             <div className="space-y-4">
-              {transactions.map((transaction) => (
+              {filteredTransactions.map((transaction) => (
                 <div
                   key={transaction.id}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"

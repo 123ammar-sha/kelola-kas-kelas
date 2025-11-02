@@ -227,7 +227,7 @@ MIT License
 
 ## 👨‍💻 Author
 
-Developed by [Your Name]
+Developed by AmmarShafiy Dan Kawan AI
 
 ---
 

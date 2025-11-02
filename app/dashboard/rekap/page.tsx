@@ -136,7 +136,7 @@ export default async function RekapPage() {
           <CardHeader>
             <CardTitle>Transaksi Masuk</CardTitle>
             <CardDescription>
-              Detail transaksi  masuk dan tagihan per batch
+              Detail transaksi masuk dan tagihan per batch
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -160,14 +160,16 @@ export default async function RekapPage() {
                       .map((t) => (
                         <div
                           key={t.id}
-                          className="flex items-center justify-between py-2 px-3 bg-green-50 rounded"
+                          className="flex items-center justify-between py-2 px-3 bg-green-50 rounded"                          
                         >
-                          <span className="text-sm">
-                            {t.description.split(" - ")[1] || "Anggota"} -{" "}
-                            <span className="text-muted-foreground">
-                              {formatDate(new Date(t.createdAt))}
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">
+                              {t.user.name} {/* Nama anggota ditampilkan di sini */}
                             </span>
-                          </span>
+                            <span className="text-xs text-muted-foreground">
+                              {t.description} - {formatDate(new Date(t.createdAt))}
+                            </span>
+                          </div>
                           <span className="font-bold text-green-600">
                             +{formatCurrency(t.amount)}
                           </span>

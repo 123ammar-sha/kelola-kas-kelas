@@ -10,8 +10,23 @@ export function ExportButton() {
   const handleExport = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/export/rekap");
-      const blob = await response.blob();
+      const res = await fetch("/api/export/rekap");
+
+      // cek status dulu
+      if (!res.ok) {
+        const contentType = res.headers.get("content-type") || "";
+        let msg = `Status ${res.status}`;
+        if (contentType.includes("application/json")) {
+          const json = await res.json();
+          msg = json.error || JSON.stringify(json);
+        } else {
+          msg = await res.text();
+        }
+        alert("Gagal mengekspor: " + msg);
+        return;
+      }
+
+      const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -21,7 +36,8 @@ export function ExportButton() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      alert("Gagal mengekspor data");
+      console.error("Export error:", error);
+      alert("Gagal mengekspor data (client error)");
     } finally {
       setLoading(false);
     }
@@ -34,7 +50,3 @@ export function ExportButton() {
     </Button>
   );
 }
-
-
-
-

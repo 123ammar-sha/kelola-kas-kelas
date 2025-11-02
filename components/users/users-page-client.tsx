@@ -128,28 +128,28 @@ export function UsersPageClient() {
                           {getRoleLabel(user.role)}
                         </span>
                       </p>
-                      <p className="text-sm text-muted-foreground">
-                        {user.email}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
                       <p className="text-xs text-muted-foreground">
                         Bergabung: {formatDate(new Date(user.createdAt))}
                       </p>
                     </div>
                   </div>
-                  <Button
+                   <Button
                     variant="outline"
+                    size="sm"
+                    className="px-2 md:px-3 text-xs md:text-sm"
                     onClick={() => handleResetPassword(user.id)}
                     disabled={resettingId === user.id}
                   >
                     {resettingId === user.id ? (
                       <>
-                        <RotateCw className="mr-2 h-4 w-4 animate-spin" />
-                        Resetting...
+                        <RotateCw className="mr-2 h-3 w-3 md:h-4 md:w-4 animate-spin" />
+                        <span className="text-xs md:text-sm">Resetting...</span>
                       </>
                     ) : (
                       <>
-                        <KeyRound className="mr-2 h-4 w-4" />
-                        Reset Password
+                        <KeyRound className="mr-2 h-3 w-3 md:h-4 md:w-4" />
+                        <span className="text-xs md:text-sm">Reset Password</span>
                       </>
                     )}
                   </Button>

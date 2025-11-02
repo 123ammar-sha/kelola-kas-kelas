@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user.role !== "BENDAHARA") {
+    if (!session || session.user.role == "ANGGOTA") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
